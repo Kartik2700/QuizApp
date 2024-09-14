@@ -56,40 +56,46 @@ public class QuestionService {
         }
     }
 
-    public ResponseEntity<List<Integer>> getQuestionForQuiz(String category, int numQues) {
-        List<Integer> questions = questionRepo.findRandomQuestion(category,numQues);
-        return new ResponseEntity<>(questions,HttpStatus.OK);
+    public ResponseEntity<Object> getQuestionForQuiz(String category, int numQues) {
+        int noOfQues = questionRepo.findTotalNoOfQuestion(category);
+        if(noOfQues<numQues) {
+            String message = "Not enough questions available for the category: " + category;
+            return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+        }
+        List<Integer> questions = questionRepo.findRandomQuestion(category, numQues);
+        return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 
-    public ResponseEntity<List<QuestionWrapper>>getQuestionsById(List<Integer> questionsID) {
+    public ResponseEntity<List<QuestionWrapper>> getQuestionsById(List<Integer> questionsID) {
+
         List<QuestionWrapper> questionWrappers = new ArrayList<>();
-            List<Questions> question = new ArrayList<>();
-        for(var qId:questionsID){
+        List<Questions> question = new ArrayList<>();
+        for (var qId : questionsID) {
             question.add(questionRepo.findById(qId).get());
         }
 
-        for(var q: question){
-           QuestionWrapper wrapper = new QuestionWrapper();
-           wrapper.setQuestionId(q.getQuestionId());
-           wrapper.setQuestionTitle(q.getQuestionTitle());
-           wrapper.setOption1(q.getOption1());
+        for (var q : question) {
+            QuestionWrapper wrapper = new QuestionWrapper();
+            wrapper.setQuestionId(q.getQuestionId());
+            wrapper.setQuestionTitle(q.getQuestionTitle());
+            wrapper.setOption1(q.getOption1());
             wrapper.setOption2(q.getOption2());
             wrapper.setOption3(q.getOption3());
             wrapper.setOption4(q.getOption4());
             questionWrappers.add(wrapper);
         }
-        return new ResponseEntity<>(questionWrappers,HttpStatus.OK);
+        return new ResponseEntity<>(questionWrappers, HttpStatus.OK);
     }
 
     public ResponseEntity<Integer> getScore(List<Response> responses) {
-        int score=0;
-        for(var response: responses){
+        int score = 0;
+        for (var response : responses) {
             Questions questions = questionRepo.findById(response.getId()).get();
 
-            if(response.getAnswerSubmitByUser().equals(questions.getRightAnswer())) {
+            if (response.getAnswerSubmitByUser().equals(questions.getRightAnswer())) {
                 score++;
             }
         }
-        return new ResponseEntity<>(score,HttpStatus.OK);
+        return new ResponseEntity<>(score, HttpStatus.OK);
     }
 }

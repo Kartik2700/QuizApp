@@ -18,4 +18,6 @@ public interface QuestionRepo extends JpaRepository<Questions,Integer> {
     @Query(value= "SELECT  q.question_Id FROM questions q WHERE q.category=:category ORDER BY RANDOM() LIMIT :numQues", nativeQuery = true)
     List<Integer> findRandomQuestion(String category, int numQues);
 
+    @Query(value="SELECT count(q.question_Id) FROM questions q WHERE q.category=:category",nativeQuery = true)
+    int findTotalNoOfQuestion(String category);
 }
